@@ -23,22 +23,18 @@ public class Tests
 
         var snippet = new YouTube.Responses.Snippet
         {
-            PublishedAt = DateTime.UtcNow,
             ResourceId = resourceId
-        };
-
-
-        var playlistItem = new YouTube.Responses.PlaylistItem
-        {
-            Snippet = snippet
         };
 
         YouTube.Responses.PlaylistItem[] items =
         [
-            playlistItem
+            new()
+            {
+                Snippet = snippet
+            }
         ];
 
-        var expectedPlaylistItems = new YouTube.Responses.PlaylistItems
+        var playlistItems = new YouTube.Responses.PlaylistItems
         {
             Items = items
         };
@@ -48,7 +44,7 @@ public class Tests
                 httpRequestMessageFactoryHandler.SendAsync<YouTube.Responses.PlaylistItems>(
                     It.IsAny<Func<HttpRequestMessage>>(),
                     cancellationTokenSource.Token))
-            .ReturnsAsync(expectedPlaylistItems);
+            .ReturnsAsync(playlistItems);
 
         var mockConfig = new Mock<YouTube.Interfaces.IConfig>();
 
@@ -63,10 +59,12 @@ public class Tests
         var youTube = new YouTube.YouTube(mockHttpRequestMessageFactoryHandler.Object, mockConfig.Object);
 
         // Act
-        var actualPlaylistItems = await youTube.GetPlaylistItemsAsync(videoKind, cancellationTokenSource.Token);
+        var actualResourceIds = await youTube.GetPlaylistItemsAsync(videoKind, cancellationTokenSource.Token);
 
         // Assert
-        Assert.That(actualPlaylistItems, Is.EqualTo(expectedPlaylistItems));
+        var expectedResourceIds = playlistItems.Items.Select(playlistItem => playlistItem.Snippet.ResourceId);
+
+        Assert.That(actualResourceIds, Is.EqualTo(expectedResourceIds));
 
         mockHttpRequestMessageFactoryHandler
             .Verify(
