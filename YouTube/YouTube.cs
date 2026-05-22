@@ -11,17 +11,13 @@ public sealed class YouTube(
 
     /// <inheritdoc/>
     /// <exception cref="TaskCanceledException">The cancellation token was cancelled.</exception>
-    public async Task<IEnumerable<Responses.ResourceId>> GetPlaylistItemsAsync(
-        VideoKind videoKind,
-        CancellationToken cancellationToken)
+    public async Task<PlaylistItems> GetPlaylistItemsAsync(VideoKind videoKind, CancellationToken cancellationToken)
     {
         var httpRequestMessageFactory = GetHttpRequestMessageFactory(videoKind);
 
-        var playlistItems = await httpRequestMessageFactoryHandler.SendAsync<PlaylistItems>(
+        return await httpRequestMessageFactoryHandler.SendAsync<PlaylistItems>(
             httpRequestMessageFactory,
             cancellationToken);
-
-        return playlistItems.Items.Select(playlistItem => playlistItem.Snippet.ResourceId);
     }
 
     private Func<HttpRequestMessage> GetHttpRequestMessageFactory(VideoKind videoKind) => () =>
