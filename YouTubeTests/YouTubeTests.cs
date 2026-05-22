@@ -59,12 +59,12 @@ public class Tests
         var youTube = new YouTube.YouTube(mockHttpRequestMessageFactoryHandler.Object, mockConfig.Object);
 
         // Act
-        var actualVideoIds = await youTube.GetPlaylistItemsAsync(videoKind, cancellationTokenSource.Token);
+        var actualResourceIds = await youTube.GetPlaylistItemsAsync(videoKind, cancellationTokenSource.Token);
 
         // Assert
-        var expectedVideoIds = playlistItems.Items.Select(playlistItem => playlistItem.Snippet.ResourceId.VideoId);
+        var expectedResourceIds = playlistItems.Items.Select(playlistItem => playlistItem.Snippet.ResourceId);
 
-        Assert.That(actualVideoIds, Is.EqualTo(expectedVideoIds));
+        Assert.That(actualResourceIds, Is.EqualTo(expectedResourceIds));
 
         mockHttpRequestMessageFactoryHandler
             .Verify(

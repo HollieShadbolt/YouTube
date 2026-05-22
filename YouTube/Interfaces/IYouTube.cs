@@ -11,7 +11,7 @@ public interface IYouTube
     /// <param name="videoKind">The kind, or type, of the referred resource.</param>
     /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
     /// <returns>The task object representing the asynchronous operation.</returns>
-    Task<IEnumerable<string>> GetPlaylistItemsAsync(
+    Task<IEnumerable<Responses.ResourceId>> GetPlaylistItemsAsync(
         VideoKind videoKind,
         CancellationToken cancellationToken);
 }
