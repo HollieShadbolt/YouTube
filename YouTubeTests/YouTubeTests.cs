@@ -57,10 +57,12 @@ public class Tests
 
         mockConfig.SetupGet(config => config.ChannelId).Returns(channelId);
 
+        const int maxResults = 1;
+
         var youTube = new YouTube.YouTube(mockHttpRequestMessageFactoryHandler.Object, mockConfig.Object);
 
         // Act
-        var actualSnippets = await youTube.GetPlaylistItemsAsync(videoKind, cancellationTokenSource.Token);
+        var actualSnippets = await youTube.GetPlaylistItemsAsync(videoKind, maxResults, cancellationTokenSource.Token);
 
         // Assert
         var expectedSnippets = playlistItems.Items.Select(playlistItem => playlistItem.Snippet);
@@ -73,7 +75,7 @@ public class Tests
                     httpRequestMessageFactoryHandler.SendAsync<YouTube.Responses.PlaylistItems>(
                         It.Is<Func<HttpRequestMessage>>(httpRequestMessageFactory =>
                             VerifyGetPlaylistItemsAsyncHttpRequestMessageFactory(httpRequestMessageFactory, key,
-                                videoKind, channelId)),
+                                videoKind, channelId, maxResults)),
                         cancellationTokenSource.Token),
                 Times.Exactly(1));
 
@@ -84,13 +86,14 @@ public class Tests
         Func<HttpRequestMessage> httpRequestMessageFactory,
         string key,
         VideoKind videoKind,
-        string channelId)
+        string channelId,
+        int maxResults)
     {
         var httpRequestMessage = httpRequestMessageFactory();
 
         return httpRequestMessage.Method == HttpMethod.Get &&
                httpRequestMessage.RequestUri?.ToString() ==
                $"https://www.googleapis.com/youtube/v3/playlistItems?key=" +
-               $"{key}&part=snippet&playlistId={videoKind.ToPlaylistIdPrefix()}{channelId}&maxResults=50";
+               $"{key}&part=snippet&playlistId={videoKind.ToPlaylistIdPrefix()}{channelId}&maxResults={maxResults}";
     }
 }

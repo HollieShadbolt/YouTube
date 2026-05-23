@@ -12,9 +12,9 @@ public sealed class YouTube(
 
     /// <inheritdoc/>
     /// <exception cref="TaskCanceledException">The cancellation token was cancelled.</exception>
-    public async Task<IEnumerable<Snippet>> GetPlaylistItemsAsync(VideoKind videoKind, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Snippet>> GetPlaylistItemsAsync(VideoKind videoKind, int maxResults, CancellationToken cancellationToken)
     {
-        var httpRequestMessageFactory = GetHttpRequestMessageFactory(videoKind);
+        var httpRequestMessageFactory = GetHttpRequestMessageFactory(videoKind, maxResults);
 
         var playlistItems = await httpRequestMessageFactoryHandler.SendAsync<PlaylistItems>(
             httpRequestMessageFactory,
@@ -23,7 +23,7 @@ public sealed class YouTube(
         return playlistItems.Items.Select(playlistItem => playlistItem.Snippet);
     }
 
-    private Func<HttpRequestMessage> GetHttpRequestMessageFactory(VideoKind videoKind) => () =>
+    private Func<HttpRequestMessage> GetHttpRequestMessageFactory(VideoKind videoKind, int maxResults) => () =>
     {
         var uriBuilder = new UriBuilder(Uri);
 
@@ -32,7 +32,7 @@ public sealed class YouTube(
         query["key"] = config.Key;
         query["part"] = "snippet";
         query["playlistId"] = videoKind.ToPlaylistIdPrefix() + config.ChannelId;
-        query["maxResults"] = 50.ToString();
+        query["maxResults"] = maxResults.ToString();
 
         uriBuilder.Query = query.ToString();
 
